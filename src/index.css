@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+/* Bright Famicom-era Japan: washi paper, sumi ink, vermilion, indigo, sakura, matcha */
+@theme {
+  --color-washi: #f2e6d0; /* page — warm paper, not white */
+  --color-kinari: #fbf4e6; /* raised surfaces */
+  --color-sumi: #2d2a32; /* ink, borders, text */
+  --color-sumi-soft: #6b6470;
+  --color-shu: #d6452f; /* vermilion — torii, stamps */
+  --color-ai: #2e4a7d; /* indigo */
+  --color-sakura: #f2a7b8;
+  --color-matcha: #7fa651;
+  --color-yamabuki: #e8a33d; /* gold */
+  --color-wood: #d9b382;
+  --color-wood-dark: #a87b4f;
+
+  --font-dot: "DotGothic16", "Chakra Petch", ui-monospace, monospace;
+  --font-pixel: "Press Start 2P", "Chakra Petch", ui-monospace, monospace;
+  --font-thai: "Chakra Petch", "DotGothic16", system-ui, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-washi text-sumi font-thai antialiased;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+      env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    -webkit-tap-highlight-color: transparent;
+    /* faint ichimatsu (checker) weave in the paper */
+    background-image:
+      linear-gradient(
+        45deg,
+        rgb(168 123 79 / 0.07) 25%,
+        transparent 25%,
+        transparent 75%,
+        rgb(168 123 79 / 0.07) 75%
+      ),
+      linear-gradient(
+        45deg,
+        rgb(168 123 79 / 0.07) 25%,
+        transparent 25%,
+        transparent 75%,
+        rgb(168 123 79 / 0.07) 75%
+      );
+    background-size: 24px 24px;
+    background-position:
+      0 0,
+      12px 12px;
+  }
+  img {
+    image-rendering: pixelated;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-ai);
+    outline-offset: 4px;
+  }
+}
+
+@layer components {
+  /* Notched pixel frame in sumi ink */
+  .px-frame {
+    box-shadow:
+      0 -3px 0 0 var(--color-sumi),
+      0 3px 0 0 var(--color-sumi),
+      -3px 0 0 0 var(--color-sumi),
+      3px 0 0 0 var(--color-sumi);
+  }
+
+  /* Thicker hero frame with an offset accent-colored drop shadow */
+  .px-frame-hero {
+    box-shadow:
+      0 -4px 0 0 var(--color-sumi),
+      0 4px 0 0 var(--color-sumi),
+      -4px 0 0 0 var(--color-sumi),
+      4px 0 0 0 var(--color-sumi),
+      8px 10px 0 0 var(--accent, var(--color-shu));
+  }
+
+  .px-btn {
+    @apply relative select-none bg-kinari text-sumi;
+    box-shadow:
+      0 -3px 0 0 var(--color-sumi),
+      0 3px 0 0 var(--color-sumi),
+      -3px 0 0 0 var(--color-sumi),
+      3px 0 0 0 var(--color-sumi),
+      inset 0 -5px 0 0 rgb(45 42 50 / 0.18);
+  }
+  .px-btn:not(:disabled):active {
+    transform: translateY(3px);
+    box-shadow:
+      0 -3px 0 0 var(--color-sumi),
+      0 3px 0 0 var(--color-sumi),
+      -3px 0 0 0 var(--color-sumi),
+      3px 0 0 0 var(--color-sumi),
+      inset 0 3px 0 0 rgb(45 42 50 / 0.18);
+  }
+
+  /* Wooden fuda plaque that covers a tile */
+  .fuda {
+    background-color: var(--color-wood);
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 6px,
+      rgb(168 123 79 / 0.35) 6px 8px
+    );
+    box-shadow:
+      inset 0 0 0 2px var(--color-sumi),
+      inset 5px 5px 0 0 rgb(255 255 255 / 0.3),
+      inset -5px -5px 0 0 var(--color-wood-dark);
+    transition:
+      opacity 0.3s steps(3),
+      transform 0.3s steps(3);
+  }
+  .fuda.is-open {
+    opacity: 0;
+    transform: translateY(-12%);
+  }
+
+  /* Hanko stamp ring */
+  .hanko {
+    box-shadow:
+      0 0 0 3px var(--color-kinari),
+      0 0 0 6px currentColor;
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes stamp {
+  0% {
+    transform: scale(1.8) rotate(-12deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.92) rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-6deg);
+    opacity: 1;
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+.animate-blink {
+  animation: blink 1s steps(1) infinite;
+}
+.animate-stamp {
+  animation: stamp 0.35s steps(4) forwards;
+}
+.animate-pop {
+  animation: pop 0.3s steps(3);
+}
+.animate-shake {
+  animation: shake 0.25s steps(2) 2;
+}
+
+/* A 4EVE pixel logo that bursts out from the PERFECT stamp */
+.px-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  background: url("/images/4EVE.png") center / contain no-repeat;
+  image-rendering: pixelated;
+  opacity: 0;
+  animation: spark 2.4s steps(8) infinite;
+}
+@keyframes spark {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 1; }
+  60% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blink,
+  .animate-pop,
+  .animate-shake {
+    animation: none;
+  }
+  .animate-stamp {
+    animation: none;
+    transform: rotate(-6deg);
+  }
+  .px-spark {
+    animation: none;
+    opacity: 0;
+  }
+  .fuda {
+    transition: none;
+  }
+}
