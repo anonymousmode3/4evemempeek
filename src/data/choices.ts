@@ -7,13 +7,13 @@
  * avatar  picture shown on the pick screen and in the ranking
  */
 export const CHOICES = [
-  { id: "mind", name: "Mind", avatar: "/images/mind/mind.png" },
-  { id: "jorin", name: "Jorin", avatar: "/images/jorin/jorin.png" },
-  { id: "taaom", name: "Taaom", avatar: "/images/taaom/taaom.png" },
-  { id: "hannah", name: "Hannah", avatar: "/images/hannah/hannah.png" },
-  { id: "fai", name: "Fai", avatar: "/images/fai/fai.png" },
-  { id: "punch", name: "Punch", avatar: "/images/punch/punch.png" },
-  { id: "aheye", name: "Aheye", avatar: "/images/aheye/aheye.png" },
+  { id: "mind", name: "Mind", avatar: "/images/mind/mind.webp" },
+  { id: "jorin", name: "Jorin", avatar: "/images/jorin/jorin.webp" },
+  { id: "taaom", name: "Taaom", avatar: "/images/taaom/taaom.webp" },
+  { id: "hannah", name: "Hannah", avatar: "/images/hannah/hannah.webp" },
+  { id: "fai", name: "Fai", avatar: "/images/fai/fai.webp" },
+  { id: "punch", name: "Punch", avatar: "/images/punch/punch.webp" },
+  { id: "aheye", name: "Aheye", avatar: "/images/aheye/aheye.webp" },
 ] as const;
 
 export type Choice = (typeof CHOICES)[number];

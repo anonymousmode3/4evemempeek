@@ -13,14 +13,24 @@ import { sfx } from "../game/sound";
 import type { ChoiceId } from "../data/choices";
 import type { Phase, Question, Round, RoundResult } from "../game/types";
 
-const BEST_KEY = "eate:best";
+/** Never hold a round longer than this waiting for its picture */
+const IMAGE_WAIT_MAX_MS = 3000;
 
-function readBest(): number {
-  try {
-    return Number(localStorage.getItem(BEST_KEY)) || 0;
-  } catch {
-    return 0;
+const imageCache = new Map<string, Promise<void>>();
+
+/** Download + decode a picture once; resolves when it can be painted (or failed / took too long) */
+function preloadImage(src: string): Promise<void> {
+  let p = imageCache.get(src);
+  if (!p) {
+    const img = new Image();
+    img.src = src;
+    p = Promise.race([
+      img.decode().catch(() => {}),
+      new Promise<void>((r) => window.setTimeout(r, IMAGE_WAIT_MAX_MS)),
+    ]);
+    imageCache.set(src, p);
   }
+  return p;
 }
 
 export function useGame(questions: Question[]) {
@@ -30,8 +40,6 @@ export function useGame(questions: Question[]) {
   const [elapsed, setElapsed] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [results, setResults] = useState<RoundResult[]>([]);
-  const [best, setBest] = useState(readBest);
-  const [isNewBest, setIsNewBest] = useState(false);
   const [favorite, setFavorite] = useState<ChoiceId | null>(null);
 
   const round: Round | undefined = rounds[index];
@@ -46,6 +54,8 @@ export function useGame(questions: Question[]) {
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const elapsedRef = useRef(0);
+  // False until the current round's picture is ready and the clock is running
+  const readyRef = useRef(false);
 
   const resetClock = () => {
     elapsedRef.current = 0;
@@ -54,7 +64,7 @@ export function useGame(questions: Question[]) {
 
   const finishRound = useCallback(
     (choice: number | null) => {
-      if (phaseRef.current !== "playing" || !round) return;
+      if (phaseRef.current !== "playing" || !round || !readyRef.current) return;
       phaseRef.current = "reveal";
       const e = Math.min(elapsedRef.current, limitMs);
       const timedOut = choice === null;
@@ -78,20 +88,36 @@ export function useGame(questions: Question[]) {
     [round, limitMs],
   );
 
-  // Countdown
+  // Preload the next couple of pictures so they're already cached when their round starts
   useEffect(() => {
-    if (phase !== "playing") return;
-    const start = performance.now();
+    rounds.slice(index + 1, index + 3).forEach((r) => preloadImage(r.image));
+  }, [rounds, index]);
+
+  // Countdown — starts only once this round's picture is ready to paint
+  const image = round?.image;
+  useEffect(() => {
+    if (phase !== "playing" || !image) return;
+    let cancelled = false;
+    let id: number | undefined;
+    readyRef.current = false;
     elapsedRef.current = 0;
     setElapsed(0);
-    const id = window.setInterval(() => {
-      const e = performance.now() - start;
-      elapsedRef.current = e;
-      setElapsed(e);
-      if (e >= limitMs) finishRound(null);
-    }, 50);
-    return () => window.clearInterval(id);
-  }, [phase, index, limitMs, finishRound]);
+    preloadImage(image).then(() => {
+      if (cancelled) return;
+      readyRef.current = true;
+      const start = performance.now();
+      id = window.setInterval(() => {
+        const e = performance.now() - start;
+        elapsedRef.current = e;
+        setElapsed(e);
+        if (e >= limitMs) finishRound(null);
+      }, 50);
+    });
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [phase, index, image, limitMs, finishRound]);
 
   // Beep each time a new tile opens (skip the first)
   const prevTiles = useRef(1);
@@ -120,18 +146,8 @@ export function useGame(questions: Question[]) {
       setPhase("playing");
       return;
     }
-    const total = results.reduce((sum, r) => sum + r.points, 0);
-    setIsNewBest(total > best);
-    if (total > best) {
-      setBest(total);
-      try {
-        localStorage.setItem(BEST_KEY, String(total));
-      } catch {
-        /* storage unavailable */
-      }
-    }
     setPhase("result");
-  }, [index, rounds.length, results, best]);
+  }, [index, rounds.length]);
 
   // Show the answer for REVEAL_MS, then move on by itself
   const nextRef = useRef(next);
@@ -181,7 +197,6 @@ export function useGame(questions: Question[]) {
       }
       setFavorite(fav);
       setResults(fake);
-      setIsNewBest(false);
       setPhase("result");
     },
     [questions, favorite],
@@ -200,10 +215,8 @@ export function useGame(questions: Question[]) {
     results,
     lastResult,
     score,
-    best,
     start,
     answer: finishRound,
-    isNewBest,
     next,
     favorite,
     toPick: () => setPhase("pick"),

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 // import { BONUS_WEIGHT } from "../data/questions";
 
 interface Props {
-  best: number;
   questionCount: number;
   onStart: () => void;
 }
@@ -29,11 +28,6 @@ export function TitleScreen({ questionCount, onStart }: Props) {
         className="px-frame relative h-36 w-36 bg-sumi sm:h-44 sm:w-44"
         aria-hidden
       >
-        <img
-          src="/images/torii/1.svg"
-          alt=""
-          className="absolute inset-0 h-full w-full"
-        />
         <div className="absolute inset-0 grid grid-cols-3">
           {Array.from({ length: 9 }, (_, i) => (
             <div

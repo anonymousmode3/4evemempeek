@@ -12,7 +12,6 @@ interface Props {
   results: RoundResult[];
   favorite: ChoiceId;
   score: number;
-  isNewBest: boolean;
   onRestart: () => void;
   onTitle: () => void;
 }
@@ -21,7 +20,6 @@ export function ResultScreen({
   results,
   favorite,
   score,
-  isNewBest,
   onRestart,
   onTitle,
 }: Props) {
@@ -31,9 +29,23 @@ export function ResultScreen({
   const maxScore = results.reduce((sum, r) => sum + maxScoreFor(r.weight), 0);
 
   return (
-    <div className="flex flex-1 flex-col gap-8">
-      <div className="mt-8" />
+    <div className="flex flex-1 flex-col gap-4">
+      {/* {verdict.kind === "perfect" && <div className="mt-0.5" />} */}
       <VerdictCard verdict={verdict} />
+      <dl className="flex justify-center gap-10 text-center text-sm text-sumi-soft mt-3">
+        <div>
+          <dt>ตอบถูกทั้งหมด</dt>
+          <dd className="font-dot mt-1 text-2xl text-sumi">
+            {correct}/{results.length}
+          </dd>
+        </div>
+        <div>
+          <dt>คะแนนรวม</dt>
+          <dd className="font-dot mt-1 text-2xl text-shu">
+            {score}/{maxScore}
+          </dd>
+        </div>
+      </dl>
       <section aria-label="อันดับความแม่น">
         <p className="text-sumi-soft font-bold text-lg">
           อันดับที่คุณทายแม่นที่สุด
@@ -86,24 +98,6 @@ export function ResultScreen({
           })}
         </ol>
       </section>
-
-      <dl className="flex justify-center gap-10 text-center text-sm text-sumi-soft">
-        <div>
-          <dt>ตอบถูกทั้งหมด</dt>
-          <dd className="font-dot mt-1 text-2xl text-sumi">
-            {correct}/{results.length}
-          </dd>
-        </div>
-        <div>
-          <dt>คะแนนรวม</dt>
-          <dd className="font-dot mt-1 text-2xl text-shu">
-            {score}/{maxScore}
-          </dd>
-          {isNewBest && (
-            <dd className="animate-blink font-bold text-ai">สถิติใหม่!</dd>
-          )}
-        </div>
-      </dl>
 
       <div className="mt-auto flex flex-col gap-5 pb-2 md:flex-row-reverse">
         <button
@@ -254,7 +248,7 @@ function VerdictCard({ verdict }: { verdict: Verdict }) {
         <PerfectStamp text={kanji} />
       ) : (
         <span
-          className={`hanko font-dot animate-stamp absolute -top-5 -left-3 bg-kinari px-2 py-1 text-2xl text-shu`}
+          className={`hanko font-dot animate-stamp absolute -top-5 -left-1 bg-kinari px-2 py-1 text-2xl text-shu`}
           aria-hidden
         >
           {kanji}
@@ -296,7 +290,7 @@ function PerfectStamp({ text }: { text: string }) {
   return (
     // Centered on the card's top edge, with the 4EVE burst around it
     <span
-      className="absolute -top-10 left-1/2 z-10 -translate-x-1/2"
+      className="absolute -top-7 left-1/2 z-10 -translate-x-1/2"
       aria-hidden
     >
       {SPARKS.map(([dx, dy, delay], i) => (

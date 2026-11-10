@@ -28,7 +28,7 @@ export default function App() {
   return (
     <main className="mx-auto flex min-h-full w-full max-w-md flex-col px-5 py-4 md:max-w-3xl md:px-8 md:py-8">
       <div className="flex justify-end gap-2">
-        {import.meta.env.DEV && SHOW_DEV_SHORTCUTS && (
+        {/* {import.meta.env.DEV && SHOW_DEV_SHORTCUTS && (
           <div className="mr-auto flex flex-wrap items-center gap-x-2 text-sm text-ai">
             <span>[dev] ผล:</span>
             {DEV_VERDICTS.map(([kind, label]) => (
@@ -42,7 +42,7 @@ export default function App() {
               </button>
             ))}
           </div>
-        )}
+        )} */}
         {(game.phase === "playing" || game.phase === "reveal") && (
           <button type="button" onClick={game.toTitle} className="p-2 text-sm text-sumi-soft">
             ออกจากเกม
@@ -59,7 +59,7 @@ export default function App() {
       </div>
 
       {game.phase === "title" && (
-        <TitleScreen best={game.best} questionCount={questions.length} onStart={game.toPick} />
+        <TitleScreen questionCount={questions.length} onStart={game.toPick} />
       )}
 
       {game.phase === "pick" && (
@@ -95,7 +95,6 @@ export default function App() {
           results={game.results}
           favorite={game.favorite}
           score={game.score}
-          isNewBest={game.isNewBest}
           onRestart={game.toPick}
           onTitle={game.toTitle}
         />

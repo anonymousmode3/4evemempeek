@@ -13,4 +13,4 @@ export const DEFAULT_TIME_LIMIT = 15; // seconds
 export const SHUFFLE_QUESTIONS = true;
 
 /** Show the [dev] result shortcut buttons (only ever shown in `npm run dev`) */
-export const SHOW_DEV_SHORTCUTS = false;
+export const SHOW_DEV_SHORTCUTS = true;
