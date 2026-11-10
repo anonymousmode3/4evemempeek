@@ -4,17 +4,8 @@ import { PickScreen } from "./components/PickScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { TitleScreen } from "./components/TitleScreen";
 import { questions } from "./data/questions";
-import { SHOW_DEV_SHORTCUTS } from "./game/config";
 import { setMuted } from "./game/sound";
 import { useGame } from "./hooks/useGame";
-
-const DEV_VERDICTS = [
-  [undefined, "สุ่ม"],
-  ["perfect", "perfect"],
-  ["match", "match"],
-  ["other", "other"],
-  ["none", "none"],
-] as const;
 
 export default function App() {
   const game = useGame(questions);
@@ -28,21 +19,6 @@ export default function App() {
   return (
     <main className="mx-auto flex min-h-full w-full max-w-md flex-col px-5 py-4 md:max-w-3xl md:px-8 md:py-8">
       <div className="flex justify-end gap-2">
-        {/* {import.meta.env.DEV && SHOW_DEV_SHORTCUTS && (
-          <div className="mr-auto flex flex-wrap items-center gap-x-2 text-sm text-ai">
-            <span>[dev] ผล:</span>
-            {DEV_VERDICTS.map(([kind, label]) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => game.devSkipToResult(kind)}
-                className="py-2 underline"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )} */}
         {(game.phase === "playing" || game.phase === "reveal") && (
           <button type="button" onClick={game.toTitle} className="p-2 text-sm text-sumi-soft">
             ออกจากเกม
@@ -59,7 +35,11 @@ export default function App() {
       </div>
 
       {game.phase === "title" && (
-        <TitleScreen questionCount={questions.length} onStart={game.toPick} />
+        <TitleScreen
+          questionCount={questions.length}
+          onStart={game.toPick}
+          onSecretResult={game.devSkipToResult}
+        />
       )}
 
       {game.phase === "pick" && (

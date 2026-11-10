@@ -159,12 +159,12 @@ export function useGame(questions: Question[]) {
   }, [phase, index]);
 
   /**
-   * DEV only: fill fake answers for every question and jump to the result screen.
+   * Secret shortcut: fill fake answers for every question and jump to the result screen.
    * Pass a verdict kind to keep re-rolling until the result screen shows that verdict.
    */
   const devSkipToResult = useCallback(
-    (kind?: Verdict["kind"]) => {
-      const fav = favorite ?? questions[0].answer;
+    (kind?: Verdict["kind"], favoriteOverride?: ChoiceId) => {
+      const fav = favoriteOverride ?? favorite ?? questions[0].answer;
       const roll = (): RoundResult[] => {
         // Each member gets their own hit rate so rankings vary a lot between rolls
         const rate = new Map<ChoiceId, number>();

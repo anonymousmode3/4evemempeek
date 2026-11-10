@@ -12,5 +12,13 @@ export const DEFAULT_TIME_LIMIT = 15; // seconds
 /** Shuffle the question order each game */
 export const SHUFFLE_QUESTIONS = true;
 
-/** Show the [dev] result shortcut buttons (only ever shown in `npm run dev`) */
-export const SHOW_DEV_SHORTCUTS = true;
+/** Hold the "เริ่มเกม" button this long to open the secret result-shortcut panel */
+export const SECRET_HOLD_MS = 10_000;
+
+/**
+ * SHA-256 of the secret code.
+ * Only the hash ships in the site, so the code itself isn't readable in the JS.
+ * To change it:  echo -n "your-code" | shasum -a 256
+ */
+export const SECRET_CODE_SHA256 =
+  "28351392195443a09c606a98d4687252a67138aedd655bae882b84b87d9dff06";

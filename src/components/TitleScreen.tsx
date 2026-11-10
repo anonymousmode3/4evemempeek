@@ -1,19 +1,40 @@
-import { useEffect, useState } from "react";
-// import { DEFAULT_TIME_LIMIT, MAX_TILES } from "../game/config";
-// import { BONUS_WEIGHT } from "../data/questions";
+import { useEffect, useRef, useState } from "react";
+import type { ChoiceId } from "../data/choices";
+import { SECRET_HOLD_MS } from "../game/config";
+import type { Verdict } from "../game/logic";
+import { SecretPanel } from "./SecretPanel";
 
 interface Props {
   questionCount: number;
   onStart: () => void;
+  onSecretResult: (kind: Verdict["kind"] | undefined, favorite: ChoiceId) => void;
 }
 
 const DEMO_OPEN = 4; // centre tile
 
-export function TitleScreen({ questionCount, onStart }: Props) {
+export function TitleScreen({ questionCount, onStart, onSecretResult }: Props) {
   const [showRules, setShowRules] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
+
+  // Holding "เริ่มเกม" for SECRET_HOLD_MS opens the secret panel instead of the rules
+  const holdTimer = useRef<number | undefined>(undefined);
+  const heldLongEnough = useRef(false);
+  const startHold = () => {
+    heldLongEnough.current = false;
+    window.clearTimeout(holdTimer.current);
+    holdTimer.current = window.setTimeout(() => {
+      heldLongEnough.current = true;
+      setShowSecret(true);
+    }, SECRET_HOLD_MS);
+  };
+  const cancelHold = () => window.clearTimeout(holdTimer.current);
+  useEffect(() => cancelHold, []);
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+      {showSecret && (
+        <SecretPanel onPick={onSecretResult} onClose={() => setShowSecret(false)} />
+      )}
       {showRules && (
         <RulesModal
           questionCount={questionCount}
@@ -54,8 +75,21 @@ export function TitleScreen({ questionCount, onStart }: Props) {
 
       <button
         type="button"
-        onClick={() => setShowRules(true)}
-        className="px-btn bg-[#EE018F] px-10 py-3 text-kinari"
+        onClick={() => {
+          // The click that ends a secret long-press shouldn't also open the rules
+          if (heldLongEnough.current) {
+            heldLongEnough.current = false;
+            return;
+          }
+          setShowRules(true);
+        }}
+        onPointerDown={startHold}
+        onPointerUp={cancelHold}
+        onPointerLeave={cancelHold}
+        onPointerCancel={cancelHold}
+        onContextMenu={(e) => e.preventDefault()}
+        style={{ WebkitTouchCallout: "none" }}
+        className="px-btn bg-[#EE018F] px-10 py-3 text-kinari select-none"
       >
         <span className="text-xl font-bold">เริ่มเกม</span>
       </button>
